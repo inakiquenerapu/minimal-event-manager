@@ -42,9 +42,16 @@
 
   if(isset($_POST["send"])) :
 
-    $date = $_POST["month"].sprintf('%02d',$_POST["day"]);
-    $title = $_POST["title"];
-    $url = $_POST["url"];
+    // Cross Site Script  & Code Injection Sanitization
+    function xss_cleaner($input_str) {
+        $return_str = str_replace( array('<',';','|','&','>',"'",'"',')','('), array('&lt;','&#58;','&#124;','&#38;','&gt;','&apos;','&#x22;','&#x29;','&#x28;'), $input_str );
+        $return_str = str_ireplace( '%3Cscript', '', $return_str );
+        return $return_str;
+    }
+
+    $date = $_POST["month"].sprintf('%02d',xss_cleaner($_POST["day"]));
+    $title = xss_cleaner($_POST["title"]);
+    $url = xss_cleaner($_POST["url"]);
 
     $query = "INSERT INTO `events` (`date`,`event`,`url`) VALUES (:date,:title,:url);";
     $stmt = $conn->prepare($query);
@@ -158,8 +165,9 @@
 
   <hr>
 
-  <div class="row">
-    <div class="column"><?=$text4;?></div>
+  <div class="row row-responsive">
+    <div class="column column-sm-70"><?=$text4;?></div>
+    <div class="column column-sm-30"><a href="https://github.com/quenerapu/minimal-event-manager" target="_blank">Fork me on Github</a></div>
   </div>
 
 </div>
